@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube URL Formatter</title>
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@1.6.5/dist/flowbite.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #FF0000;
+            --primary-hover: #CC0000;
+            --text-color: #333;
+            --bg-color: #FFFFFF;
+            --card-bg: #f9f9f9;
+            --error-color: #dc2626;
+            --success-color: #16a34a;
+            --youtube-gray: #606060;
+            --youtube-light-gray: #f2f2f2;
+            --tab-active-bg: #FF0000;
+            --tab-inactive-bg: #f1f1f1;
+            --tab-inactive-color: #606060;
+            --border-color: #e5e5e5;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --text-color: #f3f4f6;
+                --bg-color: #181818;
+                --card-bg: #242424;
+                --youtube-gray: #aaaaaa;
+                --youtube-light-gray: #303030;
+                --tab-inactive-bg: #303030;
+                --tab-inactive-color: #aaaaaa;
+                --border-color: #444444;
+            }
+        }
+
+        /* Responsive font sizing */
+        html {
+            font-size: 16px;
+        }
+        
+        @media (min-width: 768px) {
+            html {
+                font-size: 18px;
+            }
+        }
+        
+        @media (min-width: 1200px) {
+            html {
+                font-size: 20px;
+            }
+        }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            margin: 0;
+            padding: 1rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.5;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            padding: 1.5rem;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+        
+        .btn-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(93, 92, 222, 0.25);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.25rem;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        button:disabled {
+            background-color: #ff6666;
+            cursor: not-allowed;
+        }
+
+        .result-container {
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .result-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .result-box {
+            padding: 0.75rem 1rem;
+            background-color: var(--bg-color);
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            word-break: break-all;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .copy-btn {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            margin-top: 8px;
+        }
+
+        .copy-btn:hover {
+            background-color: rgba(255, 0, 0, 0.1);
+        }
+
+        .error-message {
+            color: var(--error-color);
+            margin-top: 8px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .success-message {
+            color: var(--success-color);
+            margin-top: 8px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+            display: none;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .options-container {
+            margin-bottom: 1.25rem;
+            padding: 1rem;
+            background-color: var(--bg-color);
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+        }
+
+        .checkbox-group {
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 0.5rem;
+            width: 1.125rem;
+            height: 1.125rem;
+            accent-color: var(--primary-color);
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .link-types {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 24px;
+            padding: 16px;
+            background-color: var(--bg-color);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .link-types p {
+            margin: 0 0 8px 0;
+            width: 100%;
+            font-weight: 500;
+        }
+
+        .type-pill {
+            background-color: rgba(255, 0, 0, 0.1);
+            color: var(--primary-color);
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+        }
+        
+        /* Before/After Section */
+        .before-after-container {
+            margin-top: 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .before-after-header {
+            display: flex;
+            background-color: var(--youtube-light-gray);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .before-after-header button {
+            flex: 1;
+            background-color: transparent;
+            color: var(--youtube-gray);
+            padding: 0.75rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            font-size: 1rem;
+        }
+        
+        .before-after-header button.active {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            background-color: var(--bg-color);
+        }
+        
+        .before-after-content {
+            padding: 1rem;
+            background-color: var(--bg-color);
+        }
+        
+        .before-after-section {
+            display: none;
+        }
+        
+        .before-after-section.active {
+            display: block;
+        }
+        
+        .url-display {
+            padding: 0.75rem;
+            background-color: var(--youtube-light-gray);
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        /* Tabs for URL Examples */
+        .example-tabs {
+            margin-top: 1.5rem;
+        }
+        
+        .tabs-header {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
+        
+        .tab-btn {
+            padding: 0.5rem 1rem;
+            background-color: var(--tab-inactive-bg);
+            color: var(--tab-inactive-color);
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-bottom: -1px;
+        }
+        
+        .tab-btn.active {
+            background-color: var(--tab-active-bg);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 1rem;
+            background-color: var(--youtube-light-gray);
+            border-radius: 0 0 8px 8px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .example-row {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1rem;
+        }
+        
+        .example-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .example-label {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+        }
+        
+        .example-note {
+            font-size: 0.8rem;
+            color: var(--youtube-gray);
+            margin-top: 0.25rem;
+            font-style: italic;
+        }
+        
+        .youtube-logo {
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        /* Make the app feel more YouTube-like */
+        h1 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'YouTube Sans', 'Roboto', sans-serif;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 480px) {
+            .example-row {
+                flex-direction: column;
+            }
+            
+            .before-after-header button {
+                padding: 8px;
+                font-size: 14px;
+            }
+            
+            .tab-btn {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            <svg class="youtube-logo" width="110" height="120" viewBox="-40 -7 90 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20.2838235,29.7208546 L20.2817697,19.3775851 L30.0092421,24.5671906 L20.2838235,29.7208546 Z M41.6409276,17.5856462 C41.6409276,17.5856462 41.2890436,15.0488633 40.2097727,13.9319394 C38.8405739,12.4655276 37.3060444,12.4583393 36.6026186,12.3724221 C31.5649942,12 24.008044,12 24.008044,12 L23.9922983,12 C23.9922983,12 16.4356904,12 11.398066,12.3724221 C10.6939556,12.4583393 9.16045298,12.4655276 7.79091194,13.9319394 C6.71164104,15.0488633 6.36009927,17.5856462 6.36009927,17.5856462 C6.36009927,17.5856462 6,20.5646804 6,23.5437145 L6,26.3365376 C6,29.3152295 6.36009927,32.2946059 6.36009927,32.2946059 C6.36009927,32.2946059 6.71164104,34.8310466 7.79091194,35.9483127 C9.16045298,37.4147246 10.9592378,37.3681718 11.7605614,37.5218644 C14.6406709,37.8042616 24.0001711,37.8915481 24.0001711,37.8915481 C24.0001711,37.8915481 31.5649942,37.8799099 36.6026186,37.5074878 C37.3060444,37.4219129 38.8405739,37.4147246 40.2097727,35.9483127 C41.2890436,34.8310466 41.6409276,32.2946059 41.6409276,32.2946059 C41.6409276,32.2946059 42,29.3152295 42,26.3365376 L42,23.5437145 C42,20.5646804 41.6409276,17.5856462 41.6409276,17.5856462 L41.6409276,17.5856462 Z" id="Shape" fill="#E70000"></path>
+            </svg>
+            YouTube URL Formatter
+        </h1>
+        
+        <div class="input-group">
+            <label for="youtube-url">Enter any YouTube URL format:</label>
+            <input type="text" id="youtube-url" placeholder="Paste YouTube URL here" autocomplete="off">
+            <div class="error-message" id="error-message"></div>
+        </div>
+
+        <div class="options-container">
+            <div class="checkbox-group">
+                <input type="checkbox" id="remove-playlist" checked>
+                <label for="remove-playlist">Remove playlist information</label>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="remove-timestamp">
+                <label for="remove-timestamp">Remove timestamp</label>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="remove-session-id" checked>
+                <label for="remove-session-id">Remove session ID (si parameter)</label>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="remove-all-params">
+                <label for="remove-all-params">Remove all parameters</label>
+            </div>
+        </div>
+        
+        <button id="format-btn" class="format-btn">
+            <span class="loading" id="loading-spinner"></span>
+            <div class="btn-content">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                    <path d="M9.5 7L14.5 12L9.5 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Format URL</span>
+            </div>
+        </button>
+        
+        <div class="before-after-container" id="before-after-container" style="display: none;">
+            <div class="before-after-header">
+                <button class="before-tab active">Before</button>
+                <button class="after-tab">After</button>
+            </div>
+            <div class="before-after-content">
+                <div class="before-after-section active" id="before-section">
+                    <div class="url-display" id="original-url-display"></div>
+                </div>
+                <div class="before-after-section" id="after-section">
+                    <div class="url-display" id="formatted-url-display"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="result-container" id="result-container">
+            <div class="result-title">Formatted URL:</div>
+            <div class="result-box" id="result-box"></div>
+            <button class="copy-btn" id="copy-btn">Copy to Clipboard</button>
+            <div class="success-message" id="copy-success">Copied to clipboard!</div>
+        </div>
+
+        <div class="example-tabs">
+            <div class="tabs-header">
+                <button class="tab-btn active" data-tab="standard">Standard</button>
+                <button class="tab-btn" data-tab="shortened">Shortened</button>
+                <button class="tab-btn" data-tab="mobile">Mobile</button>
+                <button class="tab-btn" data-tab="embed">Embed</button>
+                <button class="tab-btn" data-tab="shorts">Shorts</button>
+                <button class="tab-btn" data-tab="extras">Extras</button>
+            </div>
+            
+            <div class="tab-content active" id="standard-tab">
+                <div class="example-row">
+                    <div class="example-label">Before (Standard URL)</div>
+                    <div class="url-display">https://www.youtube.com/watch?v=dQw4w9WgXcQ</div>
+                </div>
+                <div class="example-row">
+                    <div class="example-label">After (Formatted URL)</div>
+                    <div class="url-display">https://www.youtube.com/watch?v=dQw4w9WgXcQ</div>
+                    <div class="example-note">Standard URLs remain the same when formatted without parameters</div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="shortened-tab">
+                <div class="example-row">
+                    <div class="example-label">Before (Shortened URL)</div>
+                    <div class="url-display">https://youtu.be/dQw4w9WgXcQ</div>
+                </div>
+                <div class="example-row">
+                    <div class="example-label">After (Formatted URL)</div>
+                    <div class="url-display">https://www.youtube.com/watch?v=dQw4w9WgXcQ</div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="mobile-tab">
+                <div class="example-row">
+                    <div class="example-label">Before (Mobile URL)</div>
+                    <div class="url-display">https://m.youtube.com/watch?v=dQw4w9WgXcQ</div>
+                </div>
+                <div class="example-row">
+                    <div class="example-label">After (Formatted URL)</div>
+                    <div class="url-display">https://www.youtube.com/watch?v=dQw4w9WgXcQ</div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="embed-tab">
+                <div class="example-row">
+                    <div class="example-label">Before (Embed URL)</div>
+                    <div class="url-display">https://www.youtube.com/embed/dQw4w9WgXcQ</div>
+                </div>
+                <div class="example-row">
+                    <div class="example-label">After (Formatted URL)</div>
+                    <div class="url-display">https://www.youtube.com/watch?v=dQw4w9WgXcQ</div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="shorts-tab">
+                <div class="example-row">
+                    <div class="example-label">Before (Shorts URL)</div>
+                    <div class="url-display">https://www.youtube.com/shorts/dQw4w9WgXcQ</div>
+                </div>
+                <div class="example-row">
+                    <div class="example-label">After (Formatted URL)</div>
+                    <div class="url-display">https://www.youtube.com/watch?v=dQw4w9WgXcQ</div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="extras-tab">
+                <div class="example-row">
+                    <div class="example-label">Before (With Playlist)</div>
+                    <div class="url-display">https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PLrEnWoR732-BHrPp_Pm8_VleD68f9s14-</div>
+                </div>
+                <div class="example-row">
+                    <div class="example-label">After (Formatted with Playlist Removed)</div>
+                    <div class="url-display">https://www.youtube.com/watch?v=dQw4w9WgXcQ</div>
+                </div>
+                
+                <div class="example-row" style="margin-top: 24px;">
+                    <div class="example-label">Before (With Timestamp)</div>
+                    <div class="url-display">https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42s</div>
+                </div>
+                <div class="example-row">
+                    <div class="example-label">After (Formatted with Timestamp Kept)</div>
+                    <div class="url-display">https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42s</div>
+                </div>
+                
+                <div class="example-row" style="margin-top: 24px;">
+                    <div class="example-label">Before (With Session ID)</div>
+                    <div class="url-display">https://www.youtube.com/watch?v=dQw4w9WgXcQ&si=abcd1234efgh5678</div>
+                </div>
+                <div class="example-row">
+                    <div class="example-label">After (Formatted with Session ID Removed)</div>
+                    <div class="url-display">https://www.youtube.com/watch?v=dQw4w9WgXcQ</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlInput = document.getElementById('youtube-url');
+            const formatBtn = document.getElementById('format-btn');
+            const resultContainer = document.getElementById('result-container');
+            const resultBox = document.getElementById('result-box');
+            const copyBtn = document.getElementById('copy-btn');
+            const errorMessage = document.getElementById('error-message');
+            const copySuccess = document.getElementById('copy-success');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            
+            // Before/After elements
+            const beforeAfterContainer = document.getElementById('before-after-container');
+            const originalUrlDisplay = document.getElementById('original-url-display');
+            const formattedUrlDisplay = document.getElementById('formatted-url-display');
+            const beforeTab = document.querySelector('.before-tab');
+            const afterTab = document.querySelector('.after-tab');
+            const beforeSection = document.getElementById('before-section');
+            const afterSection = document.getElementById('after-section');
+            
+            // Example tabs
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            // Function to extract video ID from various YouTube URL formats
+            function extractVideoId(url) {
+                if (!url) return null;
+                
+                try {
+                    // Handle various URL formats
+                    // Standard: https://www.youtube.com/watch?v=VIDEO_ID
+                    // Short: https://youtu.be/VIDEO_ID
+                    // Mobile: https://m.youtube.com/watch?v=VIDEO_ID
+                    // Embed: https://www.youtube.com/embed/VIDEO_ID
+                    // Shorts: https://www.youtube.com/shorts/VIDEO_ID
+                    
+                    // Convert URL to a URL object for parsing
+                    // Add https:// if it's missing to make URL parsing work
+                    if (!url.match(/^https?:\/\//i)) {
+                        url = 'https://' + url;
+                    }
+                    
+                    const urlObj = new URL(url);
+                    const hostname = urlObj.hostname;
+                    const pathname = urlObj.pathname;
+                    const searchParams = new URLSearchParams(urlObj.search);
+                    
+                    // Case 1: youtu.be short URL
+                    if (hostname.includes('youtu.be')) {
+                        return pathname.split('/')[1];
+                    }
+                    
+                    // Case 2: Standard youtube.com/watch?v=ID
+                    if (pathname.includes('/watch')) {
+                        return searchParams.get('v');
+                    }
+                    
+                    // Case 3: Embed links youtube.com/embed/ID
+                    if (pathname.includes('/embed/')) {
+                        return pathname.split('/embed/')[1];
+                    }
+                    
+                    // Case 4: Shorts youtube.com/shorts/ID
+                    if (pathname.includes('/shorts/')) {
+                        return pathname.split('/shorts/')[1];
+                    }
+                    
+                    // Case 5: Handle old format /v/VIDEO_ID
+                    if (pathname.includes('/v/')) {
+                        return pathname.split('/v/')[1];
+                    }
+                    
+                    // Case 6: Handle live stream URLs youtube.com/live/VIDEO_ID
+                    if (pathname.includes('/live/')) {
+                        return pathname.split('/live/')[1];
+                    }
+                    
+                    // If no pattern matches, return null
+                    return null;
+                    
+                } catch (error) {
+                    console.error('Error parsing URL:', error);
+                    return null;
+                }
+            }
+            
+            // Function to extract playlist ID if present
+            function extractPlaylistId(url) {
+                if (!url) return null;
+                
+                try {
+                    if (!url.match(/^https?:\/\//i)) {
+                        url = 'https://' + url;
+                    }
+                    
+                    const urlObj = new URL(url);
+                    const searchParams = new URLSearchParams(urlObj.search);
+                    
+                    return searchParams.get('list');
+                } catch (error) {
+                    console.error('Error extracting playlist ID:', error);
+                    return null;
+                }
+            }
+            
+            // Function to extract timestamp if present
+            function extractTimestamp(url) {
+                if (!url) return null;
+                
+                try {
+                    if (!url.match(/^https?:\/\//i)) {
+                        url = 'https://' + url;
+                    }
+                    
+                    const urlObj = new URL(url);
+                    const searchParams = new URLSearchParams(urlObj.search);
+                    
+                    // Check for 't' parameter (timestamp in seconds)
+                    return searchParams.get('t');
+                } catch (error) {
+                    console.error('Error extracting timestamp:', error);
+                    return null;
+                }
+            }
+            
+            // Function to extract session ID (si) if present in newer YouTube URLs
+            function extractSessionId(url) {
+                if (!url) return null;
+                
+                try {
+                    if (!url.match(/^https?:\/\//i)) {
+                        url = 'https://' + url;
+                    }
+                    
+                    const urlObj = new URL(url);
+                    const searchParams = new URLSearchParams(urlObj.search);
+                    
+                    // Check for 'si' parameter (session ID)
+                    return searchParams.get('si');
+                } catch (error) {
+                    console.error('Error extracting session ID:', error);
+                    return null;
+                }
+            }
+
+            // Function to create a standardized YouTube URL
+            function createStandardYouTubeUrl(videoId, playlistId, timestamp, options = {}, sessionId = null) {
+                if (!videoId) return null;
+                
+                let standardUrl = `https://www.youtube.com/watch?v=${videoId}`;
+                
+                // Check if we should remove all parameters
+                if (options.removeAllParams) {
+                    return standardUrl;
+                }
+                
+                // Add playlist if available and not removed
+                if (playlistId && !options.removePlaylist) {
+                    standardUrl += `&list=${playlistId}`;
+                }
+                
+                // Add timestamp if available and not removed
+                if (timestamp && !options.removeTimestamp) {
+                    standardUrl += `&t=${timestamp}`;
+                }
+                
+                // Add session ID if available and not removed
+                if (sessionId && !options.removeSessionId) {
+                    standardUrl += `&si=${sessionId}`;
+                }
+                
+                return standardUrl;
+            }
+
+            // Function to handle checkbox interactions
+            const removeAllParams = document.getElementById('remove-all-params');
+            const removePlaylist = document.getElementById('remove-playlist');
+            const removeTimestamp = document.getElementById('remove-timestamp');
+            
+            const removeSessionId = document.getElementById('remove-session-id');
+
+            // When "remove all params" is checked, disable other options
+            removeAllParams.addEventListener('change', function() {
+                if (this.checked) {
+                    removePlaylist.checked = true;
+                    removeTimestamp.checked = true;
+                    removeSessionId.checked = true;
+                    removePlaylist.disabled = true;
+                    removeTimestamp.disabled = true;
+                    removeSessionId.disabled = true;
+                } else {
+                    removePlaylist.disabled = false;
+                    removeTimestamp.disabled = false;
+                    removeSessionId.disabled = false;
+                }
+            });
+
+            // Tab navigation for Before/After display
+            beforeTab.addEventListener('click', function() {
+                afterTab.classList.remove('active');
+                beforeTab.classList.add('active');
+                afterSection.classList.remove('active');
+                beforeSection.classList.add('active');
+            });
+            
+            afterTab.addEventListener('click', function() {
+                beforeTab.classList.remove('active');
+                afterTab.classList.add('active');
+                beforeSection.classList.remove('active');
+                afterSection.classList.add('active');
+            });
+            
+            // Example tabs navigation
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons and contents
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    button.classList.add('active');
+                    
+                    // Show corresponding content
+                    const tabId = button.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+            
+            // Event listener for the format button
+            formatBtn.addEventListener('click', function() {
+                const youtubeUrl = urlInput.value.trim();
+                
+                // Reset UI state
+                errorMessage.style.display = 'none';
+                resultContainer.style.display = 'none';
+                beforeAfterContainer.style.display = 'none';
+                loadingSpinner.style.display = 'inline-block';
+                
+                if (!youtubeUrl) {
+                    errorMessage.textContent = 'Please enter a YouTube URL';
+                    errorMessage.style.display = 'block';
+                    loadingSpinner.style.display = 'none';
+                    return;
+                }
+                
+                // Small timeout to simulate processing and show the spinner
+                setTimeout(() => {
+                    const videoId = extractVideoId(youtubeUrl);
+                    
+                    if (!videoId) {
+                        errorMessage.textContent = 'Could not extract a valid YouTube video ID from the URL';
+                        errorMessage.style.display = 'block';
+                        loadingSpinner.style.display = 'none';
+                        return;
+                    }
+                    
+                    const playlistId = extractPlaylistId(youtubeUrl);
+                    const timestamp = extractTimestamp(youtubeUrl);
+                    
+                    // Extract session ID if present
+                    const sessionId = extractSessionId(youtubeUrl);
+                    
+                    // Get user formatting preferences
+                    const options = {
+                        removePlaylist: removePlaylist.checked,
+                        removeTimestamp: removeTimestamp.checked,
+                        removeSessionId: document.getElementById('remove-session-id').checked,
+                        removeAllParams: removeAllParams.checked
+                    };
+                    
+                    const standardUrl = createStandardYouTubeUrl(videoId, playlistId, timestamp, options, sessionId);
+                    
+                    // Update result displays
+                    resultBox.textContent = standardUrl;
+                    
+                    // Update Before/After display
+                    originalUrlDisplay.textContent = youtubeUrl;
+                    formattedUrlDisplay.textContent = standardUrl;
+                    
+                    // Show result containers
+                    resultContainer.style.display = 'block';
+                    beforeAfterContainer.style.display = 'block';
+                    
+                    // Ensure Before tab is active by default
+                    beforeTab.click();
+                    
+                    loadingSpinner.style.display = 'none';
+                }, 500);
+            });
+
+            // Event listener for the copy button
+            copyBtn.addEventListener('click', function() {
+                const textToCopy = resultBox.textContent;
+                
+                // Use the Clipboard API
+                navigator.clipboard.writeText(textToCopy)
+                    .then(() => {
+                        copySuccess.style.display = 'block';
+                        setTimeout(() => {
+                            copySuccess.style.display = 'none';
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Could not copy text: ', err);
+                        copySuccess.textContent = 'Failed to copy. Please try manually.';
+                        copySuccess.style.display = 'block';
+                    });
+            });
+
+            // Event listener for the input field to enable Enter key
+            urlInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    formatBtn.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
